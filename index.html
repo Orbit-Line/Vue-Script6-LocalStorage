@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+    <title>Document</title>
+</head>
+<body>
+   <div id="app" >
+    
+       <div class="shadow-md container mx-auto mt-5 border border-green-500 flex flex-wrap items-center flex-col text-xl p-4">
+         <div class="insertar">
+          <input class="border border-blue-500  bg-pink-500 p-2"  type="text" placeholder="Ingresar una tarea" v-model="tarea">
+          <button class="border p-2 bg-blue-500 text-white p-2" @click="insertarTarea()">Agregar</button>
+         </div>                                                                                                    
+         <ul class="w-full m-2">
+             <li class="my-2 p-2 bg-gray-300" v-for="(todo, key) in todos" :key="todo.id">
+             <div class="inline float-right">
+              <button class="px-2 bg-gray-900 text-white"
+              @click="editing === key ? terminarEditarTarea(key) : editarTarea(key)">
+              {{editing === key ? 'Editado' : 'Editar' }}
+              </button>
+              <button class="px-2 bg-red-500 text-white" @click="eliminarTarea(key)">Eliminar</button>
+             </div>                                                                                                        
+             <span :contenteditable="editing === key" 
+             :ref="`span-${key}`"
+             @blur="terminarEditarTarea(key)">{{todo.title}}</span>
+            </li>
+         </ul>
+       </div>
+  </div>
+ 
+
+
+      <script type="module">
+        import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.esm.browser.js'
+       
+        
+        new Vue({
+            el: "#app",
+            data() {
+              return {
+               todos: [
+                 { id: "", title: ""}
+                 
+               ],
+               tarea: "" ,
+               editing: null,
+              }
+
+            },
+            methods: {
+              insertarTarea() {
+                this.todos.push({
+                  id: this.todos.length + 1,
+                  title: this.tarea
+                });
+                this.saveLocalStorage();
+              },
+              eliminarTarea(key){
+                this.todos.splice(key, 1);
+                this.saveLocalStorage();
+
+              },
+              editarTarea(key){
+                this.editing = key;
+                const span = this.$refs[`span-${key}`][0];
+               // span.setAttribute("contenteditable", "true");
+                span.focus();
+              }, 
+              terminarEditarTarea(key){
+                this.editing = null;
+                const span = this.$refs[`span-${key}`][0];
+                this.todos[key].title = span.innerHTML;
+                this.saveLocalStorage();
+
+              },
+              saveLocalStorage(){
+                window.localStorage.setItem("todos", JSON.stringify(this.todos));
+              }
+            },
+            mounted() {
+              this.todos = JSON.parse(window.localStorage.getItem("todos"));
+
+            }
+        })
+
+      </script>
+
+</body>
+</html>
